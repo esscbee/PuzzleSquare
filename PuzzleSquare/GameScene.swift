@@ -9,28 +9,27 @@
 import SpriteKit
 
 class GameScene: SKScene {
-    var square = 10
-    var board : [ Int ]!
-    weak var zeroTile : Tile!
+    var square = 4
+    var board : [ Tile ]!
+//    weak var zeroTile : Tile!
     
     func resetBoard() {
-        let size = square * square
-        board = [ Int ]()
-        for i in 0..<size {
-            board.append(i)
+        let boardSize = square * square
+        var locBoard = [Int]()
+        for i in 0..<boardSize {
+            locBoard.append(i)
         }
-        for _ in 1...size {
-            let c1 = Int(rand()) % size
-            let c2 = Int(rand()) % size
+        for _ in 1...boardSize {
+            let c1 = Int(rand()) % boardSize
+            let c2 = Int(rand()) % boardSize
             if c1 == c2 {
                 continue
             }
-            let t = board[c1]
-            board[c1] = board[c2]
-            board[c2] = t
+            let t = locBoard[c1]
+            locBoard[c1] = locBoard[c2]
+            locBoard[c2] = t
         }
-    }
-    func showBoard() {
+        // nuke old board
         var toRemove = [ Tile ]()
         for c in children {
             if let n = c as? Tile {
@@ -38,23 +37,22 @@ class GameScene: SKScene {
             }
         }
         removeChildrenInArray(toRemove)
+        // create new board
         let maxBlock = square
         let margin = CGFloat(20)
         let totalWidth = frame.width - 2 * margin
         let size = totalWidth / CGFloat(maxBlock)
-        var num = 0
-        for row in 1...square {
-            for col in 1...square {
-                let myBlock = Tile(num:board[num], size:size - 4)
-                addChild(myBlock)
-                if myBlock.num == 0 {
-                    zeroTile = myBlock
-                }
-                let xPos = (CGFloat(col) - 0.5) * size + margin
-                let yPos = ((CGFloat(row) - 2.5) * -1.0) * size + frame.height / 2
-                myBlock.position = CGPointMake(xPos, yPos)
-                num += 1
-            }
+        board = [Tile]()
+        for idx in 0..<boardSize {
+            let row = idx / square
+            let col = idx % square
+            
+            let theTile = Tile(num:locBoard[idx], size:size - 4)
+            board.append(theTile)
+            addChild(theTile)
+            let xPos = (CGFloat(col) + 0.5) * size + margin
+            let yPos = ((CGFloat(row) - 1.5) * -1.0) * size + frame.height / 2
+            theTile.position = CGPointMake(xPos, yPos)
         }
     }
     override func didMoveToView(view: SKView) {
@@ -62,13 +60,12 @@ class GameScene: SKScene {
         srand(time)
 
         resetBoard()
-        showBoard()
         
     }
     
     func checkWin() -> Bool {
-        for i in board[0..<board.count] {
-            if board[i] != (i+1) {
+        for i in 0..<board.count {
+            if board[i].num != (i+1) {
                 return false
             }
         }
@@ -84,7 +81,34 @@ class GameScene: SKScene {
     
     static let allDirections : [ Direction ] = [ .UP, .DOWN, .LEFT, .RIGHT ]
     
-    
+    func drill(idx : Int, delta : Int, validate : (Int, Int) -> Bool) -> Tile? {
+        if board[idx].num == 0 {
+            return board[idx]
+        }
+        let nidx = idx + delta
+        if !validate(idx, nidx) {
+            return nil
+        }
+        if let zero = drill(nidx, delta: delta, validate: validate) {
+            let nonzero = board[idx]
+            board[nidx] = nonzero
+            board[idx] = zero
+            let pos = zero.position
+            zero.position = nonzero.position
+            nonzero.position = pos
+            return zero
+        }
+        return nil
+    }
+    func hCheck(idx : Int, nidx : Int) -> Bool {
+        if idx / square != nidx / square {
+            return false
+        }
+        return nidx >= 0 && nidx < board.count
+    }
+    func vCheck(idx : Int, nidx : Int) -> Bool {
+        return nidx >= 0 && nidx < board.count
+    }
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         for touch in touches {
             let location = touch.locationInNode(self)
@@ -94,55 +118,18 @@ class GameScene: SKScene {
                         continue
                     }
                     
-                    let idx = board.indexOf(t.num)!
-                    let idx0 = board.indexOf(0)!
+                    let idx = board.indexOf(t)!
                     
-                    for d in GameScene.allDirections {
-                        var nidx = -1
-                        switch(d) {
-                        case .UP:
-                            nidx = idx - square
-                            if nidx < 0 {
-                                continue
-                            }
-                        case .DOWN:
-                            nidx = idx + square
-                            if nidx >= board.count {
-                                continue
-                            }
-                        case .LEFT:
-                            nidx = idx - 1
-                            if idx < 0 {
-                                continue
-                            }
-                            // check wrapping row
-                            if nidx / square != idx / square {
-                                continue
-                            }
-                        case .RIGHT:
-                            nidx = idx + 1
-                            if idx >= board.count {
-                                continue
-                            }
-                            // check wrapping row
-                            if nidx / square != idx / square {
-                                continue
-                            }
-                        }
-                        if nidx != idx0 {
-                            continue
-                        }
-                        // swap in board
-                        let tt = board[idx0]
-                        board[idx0] = board[idx]
-                        board[idx] = tt
-                        // move piece
-                        let savePos = zeroTile.position
-                        zeroTile.position = t.position
-                        t.position = savePos
+                    var found = nil != drill(idx, delta: -1, validate: hCheck)
+                    found = found || nil != drill(idx, delta: 1, validate: hCheck)
+                    found = found || nil != drill(idx, delta: square, validate: vCheck)
+                    found = found || nil != drill(idx, delta: -square, validate: vCheck)
+                    if found {
+                        checkWin()
                     }
                 }
             }
+            
         }
     }
    

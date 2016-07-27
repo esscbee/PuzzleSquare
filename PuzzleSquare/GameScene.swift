@@ -9,8 +9,9 @@
 import SpriteKit
 
 class GameScene: SKScene {
-    var square = 4
+    var square = 10
     var board : [ Int ]!
+    weak var zeroTile : Tile!
     
     func resetBoard() {
         let size = square * square
@@ -46,6 +47,9 @@ class GameScene: SKScene {
             for col in 1...square {
                 let myBlock = Tile(num:board[num], size:size - 4)
                 addChild(myBlock)
+                if myBlock.num == 0 {
+                    zeroTile = myBlock
+                }
                 let xPos = (CGFloat(col) - 0.5) * size + margin
                 let yPos = ((CGFloat(row) - 2.5) * -1.0) * size + frame.height / 2
                 myBlock.position = CGPointMake(xPos, yPos)
@@ -78,6 +82,7 @@ class GameScene: SKScene {
         case RIGHT
     }
     
+    static let allDirections : [ Direction ] = [ .UP, .DOWN, .LEFT, .RIGHT ]
     
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -87,6 +92,54 @@ class GameScene: SKScene {
                 if let t = n as? Tile {
                     if t.num == 0 {
                         continue
+                    }
+                    
+                    let idx = board.indexOf(t.num)!
+                    let idx0 = board.indexOf(0)!
+                    
+                    for d in GameScene.allDirections {
+                        var nidx = -1
+                        switch(d) {
+                        case .UP:
+                            nidx = idx - square
+                            if nidx < 0 {
+                                continue
+                            }
+                        case .DOWN:
+                            nidx = idx + square
+                            if nidx >= board.count {
+                                continue
+                            }
+                        case .LEFT:
+                            nidx = idx - 1
+                            if idx < 0 {
+                                continue
+                            }
+                            // check wrapping row
+                            if nidx / square != idx / square {
+                                continue
+                            }
+                        case .RIGHT:
+                            nidx = idx + 1
+                            if idx >= board.count {
+                                continue
+                            }
+                            // check wrapping row
+                            if nidx / square != idx / square {
+                                continue
+                            }
+                        }
+                        if nidx != idx0 {
+                            continue
+                        }
+                        // swap in board
+                        let tt = board[idx0]
+                        board[idx0] = board[idx]
+                        board[idx] = tt
+                        // move piece
+                        let savePos = zeroTile.position
+                        zeroTile.position = t.position
+                        t.position = savePos
                     }
                 }
             }

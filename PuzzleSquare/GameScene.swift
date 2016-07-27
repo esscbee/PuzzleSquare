@@ -62,11 +62,34 @@ class GameScene: SKScene {
         
     }
     
+    func checkWin() -> Bool {
+        for i in board[0..<board.count] {
+            if board[i] != (i+1) {
+                return false
+            }
+        }
+        return true
+    }
+    
+    enum Direction {
+        case UP
+        case DOWN
+        case LEFT
+        case RIGHT
+    }
+    
+    
+    
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-       /* Called when a touch begins */
-        
         for touch in touches {
             let location = touch.locationInNode(self)
+            for n in nodesAtPoint(location) {
+                if let t = n as? Tile {
+                    if t.num == 0 {
+                        continue
+                    }
+                }
+            }
         }
     }
    

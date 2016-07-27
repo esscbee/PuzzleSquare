@@ -9,7 +9,7 @@
 import SpriteKit
 
 class GameScene: SKScene {
-    var square = 4
+    var square = 6
     var board : [ Tile ]!
 //    weak var zeroTile : Tile!
     
@@ -64,22 +64,13 @@ class GameScene: SKScene {
     }
     
     func checkWin() -> Bool {
-        for i in 0..<board.count {
+        for i in 0..<board.count-1 {
             if board[i].num != (i+1) {
                 return false
             }
         }
         return true
     }
-    
-    enum Direction {
-        case UP
-        case DOWN
-        case LEFT
-        case RIGHT
-    }
-    
-    static let allDirections : [ Direction ] = [ .UP, .DOWN, .LEFT, .RIGHT ]
     
     func drill(idx : Int, delta : Int, validate : (Int, Int) -> Bool) -> Tile? {
         if board[idx].num == 0 {
@@ -110,9 +101,16 @@ class GameScene: SKScene {
         return nidx >= 0 && nidx < board.count
     }
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        var win = false
         for touch in touches {
+            if win {
+                break
+            }
             let location = touch.locationInNode(self)
             for n in nodesAtPoint(location) {
+                if win {
+                    break
+                }
                 if let t = n as? Tile {
                     if t.num == 0 {
                         continue
@@ -125,11 +123,13 @@ class GameScene: SKScene {
                     found = found || nil != drill(idx, delta: square, validate: vCheck)
                     found = found || nil != drill(idx, delta: -square, validate: vCheck)
                     if found {
-                        checkWin()
+                        win = checkWin()
                     }
                 }
             }
-            
+        }
+        if win {
+            resetBoard()
         }
     }
    

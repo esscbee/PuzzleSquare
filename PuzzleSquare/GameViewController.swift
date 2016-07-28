@@ -10,11 +10,14 @@ import UIKit
 import SpriteKit
 
 class GameViewController: UIViewController {
+    
+    var gameScene : SKScene!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         if let scene = GameScene(fileNamed:"GameScene") {
+            gameScene = scene
             // Configure the view.
             let skView = self.view as! SKView
             skView.showsFPS = false
@@ -29,6 +32,26 @@ class GameViewController: UIViewController {
             
             skView.presentScene(scene)
         }
+    }
+    
+    func resetScene() {
+        if let scene = GameScene(fileNamed:"GameScene") {
+            gameScene = scene
+            // Configure the view.
+            let skView = self.view as! SKView
+            skView.showsFPS = false
+            skView.showsNodeCount = false
+            skView.showsPhysics = false
+            
+            /* Sprite Kit applies additional optimizations to improve rendering performance */
+            skView.ignoresSiblingOrder = true
+            
+            /* Set the scale mode to scale to fit the window */
+            scene.scaleMode = .ResizeFill
+            
+            skView.presentScene(scene)
+        }
+       
     }
 
     override func shouldAutorotate() -> Bool {
@@ -50,5 +73,10 @@ class GameViewController: UIViewController {
 
     override func prefersStatusBarHidden() -> Bool {
         return true
+    }
+    override func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent?) {
+        if motion == .MotionShake {
+           resetScene()
+        }
     }
 }

@@ -10,7 +10,8 @@ import SpriteKit
 
 class GameScene: SKScene {
     var square = 3
-    var board : [ Tile ]!
+    var board : Board!
+    var playerDrill : Drill!
 //    weak var zeroTile : Tile!
     
     func resetBoard() {
@@ -28,7 +29,7 @@ class GameScene: SKScene {
         let margin = CGFloat(20)
         let totalWidth = frame.width - 2 * margin
         let size = totalWidth / CGFloat(maxBlock)
-        board = [Tile]()
+        board = Board(square:square)
         for idx in 0..<boardSize {
             let row = idx / square
             let col = idx % square
@@ -43,10 +44,12 @@ class GameScene: SKScene {
         
         var counter = 0
         let target = square * square
+        let theDrill = Drill(board: board)
+        playerDrill = Drill(board: board)
         while counter < target {
             let idx = random() % board.count
-            if let _ = drill(idx) {
-                counter++
+            if let _ = theDrill.drill(idx) {
+                counter += 1
             }
         }
         
@@ -60,6 +63,8 @@ class GameScene: SKScene {
         
     }
     
+    // return true if board is in a Win state
+    
     func checkWin() -> Bool {
         for i in 0..<board.count-1 {
             if board[i].num != (i+1) {
@@ -69,44 +74,7 @@ class GameScene: SKScene {
         return true
     }
     
-    func drill(idx : Int, delta : Int, validate : (Int, Int) -> Bool) -> Tile? {
-        if board[idx].num == 0 {
-            return board[idx]
-        }
-        let nidx = idx + delta
-        if !validate(idx, nidx) {
-            return nil
-        }
-        if let zero = drill(nidx, delta: delta, validate: validate) {
-            let nonzero = board[idx]
-            board[nidx] = nonzero
-            board[idx] = zero
-            let pos = zero.position
-            zero.position = nonzero.position
-            nonzero.position = pos
-            return zero
-        }
-        return nil
-    }
-    func hCheck(idx : Int, nidx : Int) -> Bool {
-        if idx / square != nidx / square {
-            return false
-        }
-        return nidx >= 0 && nidx < board.count
-    }
-    func vCheck(idx : Int, nidx : Int) -> Bool {
-        return nidx >= 0 && nidx < board.count
-    }
-    
-    func drill(idx : Int) -> Tile? {
-        var ret : Tile?
-        
-        ret = drill(idx, delta: -1, validate: hCheck)
-        ret = ret ?? drill(idx, delta: 1, validate: hCheck)
-        ret = ret ?? drill(idx, delta: square, validate: vCheck)
-        ret = ret ?? drill(idx, delta: -square, validate: vCheck)
-        return ret
-    }
+
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         var win = false
         for touch in touches {
@@ -125,7 +93,7 @@ class GameScene: SKScene {
                     
                     let idx = board.indexOf(t)!
                     
-                    if let _ = drill(idx) {
+                    if let _ = playerDrill.drill(idx) {
                         win = checkWin()
                     }
                 }

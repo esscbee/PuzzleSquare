@@ -12,9 +12,20 @@ class GameScene: SKScene {
     var square = 2
     var board : Board!
     var playerDrill : Drill!
+    var shuffleDrill : ShuffleDrill!
+    
+    enum GameStates {
+        case START
+        case SHUFFLING
+        case PLAYING
+    }
+    
+    var state = GameStates.START
+    
 //    weak var zeroTile : Tile!
     
     func resetBoard() {
+        state = .SHUFFLING
         let boardSize = square * square
         // nuke old board
         var toRemove = [ Tile ]()
@@ -45,16 +56,16 @@ class GameScene: SKScene {
         
         var counter = 0
         let target = square * square * square
-        let theDrill = Drill(board: board)
+        shuffleDrill = ShuffleDrill(board: board)
         playerDrill = Drill(board: board)
+        var lastTile : Tile?
         while counter < target {
             let idx = random() % board.count
-            if let _ = theDrill.drill(idx) {
+            if let theTile = shuffleDrill.drill(idx, lastTile: lastTile) {
+                lastTile = theTile
                 counter += 1
             }
         }
-        
-        
     }
     override func didMoveToView(view: SKView) {
         let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
@@ -77,6 +88,9 @@ class GameScene: SKScene {
     
 
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        if state != .PLAYING {
+            return
+        }
         var win = false
         for touch in touches {
             if win {
@@ -107,6 +121,11 @@ class GameScene: SKScene {
     }
    
     override func update(currentTime: CFTimeInterval) {
-        /* Called before each frame is rendered */
+        if state == .SHUFFLING {
+            if !shuffleDrill.performAnimations(self) {
+                state = .PLAYING
+            }
+        }
+        
     }
 }

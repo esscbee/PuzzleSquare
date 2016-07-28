@@ -15,20 +15,6 @@ class GameScene: SKScene {
     
     func resetBoard() {
         let boardSize = square * square
-        var locBoard = [Int]()
-        for i in 0..<boardSize {
-            locBoard.append(i)
-        }
-        for _ in 1...boardSize {
-            let c1 = Int(rand()) % boardSize
-            let c2 = Int(rand()) % boardSize
-            if c1 == c2 {
-                continue
-            }
-            let t = locBoard[c1]
-            locBoard[c1] = locBoard[c2]
-            locBoard[c2] = t
-        }
         // nuke old board
         var toRemove = [ Tile ]()
         for c in children {
@@ -47,13 +33,24 @@ class GameScene: SKScene {
             let row = idx / square
             let col = idx % square
             
-            let theTile = Tile(num:locBoard[idx], size:size - 4)
+            let theTile = Tile(num:idx, size:size - 4)
             board.append(theTile)
             addChild(theTile)
             let xPos = (CGFloat(col) + 0.5) * size + margin
             let yPos = ((CGFloat(row) - 1.5) * -1.0) * size + frame.height / 2
             theTile.position = CGPointMake(xPos, yPos)
         }
+        
+        var counter = 0
+        let target = square * square
+        while counter < target {
+            let idx = random() % board.count
+            if let _ = drill(idx) {
+                counter++
+            }
+        }
+        
+        
     }
     override func didMoveToView(view: SKView) {
         let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
@@ -100,6 +97,16 @@ class GameScene: SKScene {
     func vCheck(idx : Int, nidx : Int) -> Bool {
         return nidx >= 0 && nidx < board.count
     }
+    
+    func drill(idx : Int) -> Tile? {
+        var ret : Tile?
+        
+        ret = drill(idx, delta: -1, validate: hCheck)
+        ret = ret ?? drill(idx, delta: 1, validate: hCheck)
+        ret = ret ?? drill(idx, delta: square, validate: vCheck)
+        ret = ret ?? drill(idx, delta: -square, validate: vCheck)
+        return ret
+    }
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         var win = false
         for touch in touches {
@@ -118,11 +125,7 @@ class GameScene: SKScene {
                     
                     let idx = board.indexOf(t)!
                     
-                    var found = nil != drill(idx, delta: -1, validate: hCheck)
-                    found = found || nil != drill(idx, delta: 1, validate: hCheck)
-                    found = found || nil != drill(idx, delta: square, validate: vCheck)
-                    found = found || nil != drill(idx, delta: -square, validate: vCheck)
-                    if found {
+                    if let _ = drill(idx) {
                         win = checkWin()
                     }
                 }

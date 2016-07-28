@@ -21,11 +21,13 @@ class GameScene: SKScene {
     }
     
     var state = GameStates.START
+    static let NextButtonName = "NextButton"
+    static let PrevButtonName = "PrevButton"
     
 //    weak var zeroTile : Tile!
     
     func resetBoard() {
-        state = .SHUFFLING
+        state = .START
         let boardSize = square * square
         // nuke old board
         var toRemove = [ Tile ]()
@@ -35,6 +37,7 @@ class GameScene: SKScene {
             }
         }
         removeChildrenInArray(toRemove)
+        
         // create new board
         let maxBlock = square
         let margin = CGFloat(20)
@@ -55,24 +58,34 @@ class GameScene: SKScene {
         }
         
         var counter = 0
-        let target = square * square * square
-        shuffleDrill = ShuffleDrill(board: board)
+        let shuffleCount = 5 * square * square * square
+        shuffleDrill = ShuffleDrill(board: board, duration: 2.0 / Double(shuffleCount) / Double(square))
         playerDrill = Drill(board: board)
         var lastTile : Tile?
-        while counter < target {
+        while counter < shuffleCount {
             let idx = random() % board.count
             if let theTile = shuffleDrill.drill(idx, lastTile: lastTile) {
                 lastTile = theTile
                 counter += 1
             }
         }
+        state = .SHUFFLING
     }
     override func didMoveToView(view: SKView) {
         let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
         srand(time)
-
         resetBoard()
         
+        let by = CGFloat(20)
+        let labelSize = CGFloat(30)
+        let nextButton = Label(size: labelSize, text: "▷")
+        nextButton.position = CGPointMake(frame.maxX - 100, by)
+        nextButton.name = GameScene.NextButtonName
+        addChild(nextButton)
+        let prevButton = Label(size: labelSize, text: "◁")
+        prevButton.position = CGPointMake(100, by)
+        prevButton.name = GameScene.PrevButtonName
+        addChild(prevButton)
     }
     
     // return true if board is in a Win state
@@ -88,9 +101,6 @@ class GameScene: SKScene {
     
 
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        if state != .PLAYING {
-            return
-        }
         var win = false
         for touch in touches {
             if win {
@@ -102,7 +112,7 @@ class GameScene: SKScene {
                     break
                 }
                 if let t = n as? Tile {
-                    if t.num == 0 {
+                    if t.num == 0 || state != .PLAYING {
                         continue
                     }
                     
@@ -111,6 +121,18 @@ class GameScene: SKScene {
                     if let _ = playerDrill.drill(idx) {
                         win = checkWin()
                     }
+                } else if let l = n as? Label {
+                    if l.name == GameScene.NextButtonName {
+                        self.square += 1
+                    } else if l.name == GameScene.PrevButtonName {
+                        self.square -= 1
+                        if self.square < 2 {
+                            self.square = 2
+                        }
+                    }
+                    resetBoard()
+                    break
+
                 }
             }
         }

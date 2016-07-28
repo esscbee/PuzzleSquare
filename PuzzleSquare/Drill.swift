@@ -92,6 +92,12 @@ class ShuffleDrill : Drill {
     var animations = [[Tile : SKAction ]]()
     
     var currentAnimation : [ Tile : SKAction ]!
+    var duration: Double
+    
+    init(board: Board, duration: Double) {
+        self.duration = duration
+        super.init(board: board)
+    }
     
     override func beginDrill() {
         currentAnimation = [ Tile : SKAction ]()
@@ -108,7 +114,7 @@ class ShuffleDrill : Drill {
     }
     
     func setPos(t : Tile, pt : CGPoint ) {
-        currentAnimation[t] = SKAction.moveTo(pt, duration: 0.1)
+        currentAnimation[t] = SKAction.moveTo(pt, duration: self.duration)
         tilePositions[t] = pt
     }
     

@@ -9,7 +9,7 @@
 import SpriteKit
 
 class GameScene: SKScene {
-    var square = 6
+    var square = 3
     var board : [ Tile ]!
 //    weak var zeroTile : Tile!
     
@@ -129,6 +129,7 @@ class GameScene: SKScene {
             }
         }
         if win {
+            square += 1
             resetBoard()
         }
     }

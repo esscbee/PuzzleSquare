@@ -9,7 +9,7 @@
 import SpriteKit
 
 class GameScene: SKScene {
-    var square = 3
+    var square = 2
     var board : Board!
     var playerDrill : Drill!
 //    weak var zeroTile : Tile!
@@ -34,7 +34,8 @@ class GameScene: SKScene {
             let row = idx / square
             let col = idx % square
             
-            let theTile = Tile(num:idx, size:size - 4)
+            let num = (1 + idx) % boardSize
+            let theTile = Tile(num:num, size:size - 4)
             board.append(theTile)
             addChild(theTile)
             let xPos = (CGFloat(col) + 0.5) * size + margin
@@ -43,7 +44,7 @@ class GameScene: SKScene {
         }
         
         var counter = 0
-        let target = square * square
+        let target = square * square * square
         let theDrill = Drill(board: board)
         playerDrill = Drill(board: board)
         while counter < target {

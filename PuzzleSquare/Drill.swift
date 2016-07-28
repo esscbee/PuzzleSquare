@@ -18,7 +18,11 @@ class Drill {
         self.board = board
         self.square = board.square
     }
-    
+    func swap(zero : Tile, target : Tile) {
+        let pos = zero.position
+        zero.position = target.position
+        target.position = pos
+    }
     // drill in a direction
     //
     func drill(idx : Int, delta : Int, validate : (Int, Int) -> Bool) -> Tile? {
@@ -33,9 +37,7 @@ class Drill {
             let nonzero = board[idx]
             board[nidx] = nonzero
             board[idx] = zero
-            let pos = zero.position
-            zero.position = nonzero.position
-            nonzero.position = pos
+            swap(zero, target: nonzero)
             return zero
         }
         return nil
@@ -64,4 +66,5 @@ class Drill {
         return ret
     }
 }
+
 

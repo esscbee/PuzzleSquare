@@ -41,8 +41,8 @@ class GameScene: SKScene {
         // create new board
         let maxBlock = square
         let margin = CGFloat(20)
-        let totalWidth = frame.width - 2 * margin
-        let size = totalWidth / CGFloat(maxBlock)
+        let width = (frame.width < frame.height ? frame.width : frame.height) - 2 * margin
+        let size = width / CGFloat(maxBlock)
         board = Board(square:square)
         for idx in 0..<boardSize {
             let row = idx / square
@@ -53,13 +53,14 @@ class GameScene: SKScene {
             board.append(theTile)
             addChild(theTile)
             let xPos = (CGFloat(col) + 0.5) * size + margin
-            let yPos = ((CGFloat(row) - 1.5) * -1.0) * size + frame.height / 2
+            let yPos = ((CGFloat(row) + 0.5 - CGFloat(maxBlock) / 2)) * -size + frame.height / 2
             theTile.position = CGPointMake(xPos, yPos)
         }
         
         var counter = 0
         let shuffleCount = 5 * square * square * square
-        shuffleDrill = ShuffleDrill(board: board, duration: 2.0 / Double(shuffleCount) / Double(square))
+        let baseDuration = square < 4 ? 1.0 : 0
+        shuffleDrill = ShuffleDrill(board: board, duration: baseDuration / Double(shuffleCount) / Double(square))
         playerDrill = Drill(board: board)
         var lastTile : Tile?
         while counter < shuffleCount {

@@ -104,7 +104,9 @@ class ShuffleDrill : Drill {
     }
     
     override func endDrill(cancel: Bool) {
-        animations.append(currentAnimation)
+        if duration != 0 {
+            animations.append(currentAnimation)
+        }
     }
     func getPos(t : Tile) -> CGPoint {
         if let pt = tilePositions[t] {
@@ -114,7 +116,11 @@ class ShuffleDrill : Drill {
     }
     
     func setPos(t : Tile, pt : CGPoint ) {
-        currentAnimation[t] = SKAction.moveTo(pt, duration: self.duration)
+        if duration != 0 {
+            currentAnimation[t] = SKAction.moveTo(pt, duration: self.duration)
+        } else {
+            t.position = pt
+        }
         tilePositions[t] = pt
     }
     

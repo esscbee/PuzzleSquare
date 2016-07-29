@@ -81,6 +81,44 @@ class GameScene: SKScene {
         state = .WIN
     }
     
+    func addBlurryBackground(image: String) {
+        if false {
+            let blurNode = SKEffectNode()
+            let blur = CIFilter(name: "CIGaussianBlur", withInputParameters: ["inputRadius": 0.5])
+            blurNode.filter = blur
+            blurNode.zPosition = -5
+            addChild(blurNode)
+            let pic = SKSpriteNode(imageNamed: image)
+            pic.zPosition = -4
+            pic.size = frame.size
+            blurNode.addChild(pic)
+        } else {
+            let uiimg = UIImage(named: "Pick")!
+            let img = CIImage(image: uiimg)!
+            let filter = CIFilter(name:"CIGaussianBlur")!
+            filter.setDefaults()
+            filter.setValue(img, forKey: kCIInputImageKey)
+            filter.setValue(2, forKey: kCIInputRadiusKey)
+            let ciContext = CIContext(options: nil)
+            let result = filter.valueForKey(kCIOutputImageKey) as! CIImage!
+            let cgImage = ciContext.createCGImage(result, fromRect: frame)
+//            let finalImage = UIImage(CGImage: cgImage)
+            let bg = SKSpriteNode(texture: SKTexture(CGImage: cgImage))
+            addChild(bg)
+//            bg.xScale = CGFloat(CGImageGetWidth(cgImage)) / frame.width
+//            bg.yScale = CGFloat(CGImageGetHeight(cgImage)) / frame.height
+//            bg.xScale = 0.1
+//            bg.yScale = 0.1
+            bg.position = CGPointMake(frame.midX, frame.midY)
+            bg.zPosition = -1
+            bg.alpha = 0.5
+            bg.size = frame.size
+            
+            
+            
+        }
+    }
+    
     func resetBoard() {
         state = .START
         
@@ -97,6 +135,8 @@ class GameScene: SKScene {
             }
         }
         removeChildrenInArray(toRemove)
+        
+        addBlurryBackground("Pick")
         
         // create new board
         let maxBlock = square
@@ -165,6 +205,7 @@ class GameScene: SKScene {
         return true
     }
     
+    var doneWithWin = 0.0
 
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         var win = false
@@ -202,10 +243,12 @@ class GameScene: SKScene {
                 }
             }
         }
+        let dt = NSDate().timeIntervalSince1970
         if win {
             state = .WIN
             showWin()
-        } else if state == .WIN {
+            doneWithWin = 1 + dt
+        } else if state == .WIN && dt > doneWithWin {
             square += 1
             resetBoard()
         }

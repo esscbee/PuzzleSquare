@@ -28,6 +28,7 @@ class GameScene: SKScene {
     
     func resetBoard() {
         state = .START
+        
         let boardSize = square * square
         // nuke old board
         var toRemove = [ Tile ]()
@@ -44,12 +45,13 @@ class GameScene: SKScene {
         let width = (frame.width < frame.height ? frame.width : frame.height) - 2 * margin
         let size = width / CGFloat(maxBlock)
         board = Board(square:square)
+        let tf = PictureTileFactory(imageNamed: "Pick", square: square)
         for idx in 0..<boardSize {
             let row = idx / square
             let col = idx % square
             
             let num = (1 + idx) % boardSize
-            let theTile = Tile(num:num, size:size - 4)
+            let theTile = tf.create(num, size:size - 4)!
             board.append(theTile)
             addChild(theTile)
             let xPos = (CGFloat(col) + 0.5) * size + margin
@@ -76,9 +78,12 @@ class GameScene: SKScene {
         let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
         srand(time)
         resetBoard()
-        
+        addBottomButtons()
+    }
+    
+    func addBottomButtons() {
         let by = CGFloat(20)
-        let labelSize = CGFloat(30)
+        let labelSize = CGFloat(40)
         let nextButton = Label(size: labelSize, text: "▷")
         nextButton.position = CGPointMake(frame.maxX - 100, by)
         nextButton.name = GameScene.NextButtonName
@@ -87,6 +92,7 @@ class GameScene: SKScene {
         prevButton.position = CGPointMake(100, by)
         prevButton.name = GameScene.PrevButtonName
         addChild(prevButton)
+
     }
     
     // return true if board is in a Win state

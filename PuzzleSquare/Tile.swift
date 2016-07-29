@@ -69,3 +69,59 @@ class Tile : Label {
         }
     }
 }
+
+class PictureTile : Tile {
+    let image  : SKTexture?
+    init(num: Int, size: CGFloat, image : SKTexture?) {
+        self.image = image
+        super.init(num: num, size: size)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    override func getTexture() -> SKTexture? {
+        return image
+    }
+    override func getFontColor() -> SKColor {
+        return SKColor.purpleColor()
+    }
+    
+}
+
+class TileFactory {
+    func create(num: Int, size: CGFloat) -> Tile? {
+        return Tile(num: num, size: size);
+    }
+}
+
+class PictureTileFactory : TileFactory {
+    let image : UIImage
+    let square : Int
+    init(imageNamed: String, square: Int) {
+        image = UIImage(named: imageNamed)!
+        self.square = square
+    }
+    override func create(num: Int, size: CGFloat) -> Tile? {
+        var sqi : SKTexture?
+        
+        if num != 0 {
+            let row = num / square
+            let col = num % square
+            let isize = image.size
+            let dx = isize.width / CGFloat(square)
+            let dy = isize.height / CGFloat(square)
+            let x = dx * CGFloat(col)
+            let y = dy * CGFloat(row)
+            let rect = CGRectMake(x, y, dx, dy)
+            
+            guard let subImage = CGImageCreateWithImageInRect(image.CGImage!, rect)
+                else { return nil }
+            
+            sqi = SKTexture(CGImage: subImage)
+        }
+        let t = PictureTile(num: num, size: size, image: sqi )
+        
+        return t
+    }
+}

@@ -9,13 +9,29 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PuzzleSquare/Drill.swift"
-            timestampString = "491439790.433392"
+            filePath = "PuzzleSquare/Tile.swift"
+            timestampString = "491503267.445828"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "performAnimations(_:)"
+            startingLineNumber = "84"
+            endingLineNumber = "84"
+            landmarkName = "getTexture()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PuzzleSquare/Tile.swift"
+            timestampString = "491503268.479993"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "76"
+            endingLineNumber = "76"
+            landmarkName = "init(num:size:image:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

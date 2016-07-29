@@ -32,7 +32,7 @@ class Label : SKSpriteNode {
             addChild(theLabel)
             theLabel.verticalAlignmentMode = .Center
             theLabel.fontSize = size * 0.7
-            theLabel.zPosition = 10
+            theLabel.zPosition = 5
             theLabel.fontColor = getFontColor()
             theLabel.fontName = "Chalkboard"
         }
@@ -93,6 +93,9 @@ class TileFactory {
     func create(num: Int, size: CGFloat) -> Tile? {
         return Tile(num: num, size: size);
     }
+    func getTexture() -> SKTexture? {
+        return nil
+    }
 }
 
 class PictureTileFactory : TileFactory {
@@ -102,9 +105,11 @@ class PictureTileFactory : TileFactory {
         image = UIImage(named: imageNamed)!
         self.square = square
     }
+    override func getTexture() -> SKTexture? {
+        return SKTexture(image: image)
+    }
     override func create(num: Int, size: CGFloat) -> Tile? {
         var sqi : SKTexture?
-        
         if num != 0 {
             let row = num / square
             let col = num % square
